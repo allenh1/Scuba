@@ -1,4 +1,4 @@
-package com.allenSoftware.Scuba;
+package com.allensoftware.scuba;
 
 import java.util.ArrayList;
 
@@ -49,6 +49,22 @@ public final class Scuba extends JavaPlugin
 		
 		divers.get(divers.size() - 1).start();
 	}
+	
+	@EventHandler
+	public void onPlayerQuit(PlayerQuitEvent event)
+	{
+		getLogger().info("Scuba: Beginning clean logoff...");
+		/** This code allows a player to sign off without crashing
+		 * the plugin. Not my wisest coding practice...
+		 */
+		
+		//find the correct diver
+		int index = 0;
+		while (divers.get(index).getPlayerName() != event.getPlayer().getName())
+			index++;
+		divers.get(index).stop();
+		divers.remove(index);
+	}//handles when a player leaves the server (to avoid a thread exception)
 	
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args)
 	{			

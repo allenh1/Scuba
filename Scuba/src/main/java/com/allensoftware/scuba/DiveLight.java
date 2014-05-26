@@ -1,4 +1,4 @@
-package com.allenSoftware.Scuba;
+package com.allensoftware.scuba;
 
 public class DiveLight extends Thread
 {

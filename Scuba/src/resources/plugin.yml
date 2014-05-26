@@ -1,6 +1,6 @@
 name: Scuba
-main: com.allenSoftware.Scuba.Scuba
-version: 0.2.0
+main: com.allensoftware.scuba.Scuba
+version: 0.1.0
 commands:
    fillTank:
       description: This command fills a given players SCUBA tank.
@@ -9,6 +9,7 @@ commands:
       permission-message: You cannot fill tanks.
    checkTank:
       description: This command checks the PSI of a Player's SCUBA tank.
+      usage: /<command>
       permission: Scuba.checkTank
       permission-message: You cannot check your tank's PSI. Hope you can swim!
    makeDiveLight:
