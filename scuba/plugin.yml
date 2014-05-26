@@ -1,0 +1,57 @@
+name: Scuba
+main: com.allenSoftware.Scuba.Scuba
+version: 0.2.0
+commands:
+   fillTank:
+      description: This command fills a given players SCUBA tank.
+      usage: /<command> [player]
+      permission: Scuba.fillTank
+      permission-message: You cannot fill tanks.
+   checkTank:
+      description: This command checks the PSI of a Player's SCUBA tank.
+      permission: Scuba.checkTank
+      permission-message: You cannot check your tank's PSI. Hope you can swim!
+   makeDiveLight:
+      description: Create a Dive Light (cost is 5 glow powder) lasting 30 Minutes.
+      permission: Scuba.makeDiveLight
+      permission-message: You need permissions to make a dive light.
+   checkDiveLight:
+      description: Check the time left for a dive light.
+      permission: Scuba.checkDiveLight
+      permission-message: Hope you can see in the dark!
+   enableDiveLight:
+      description: Turn on the dive light.
+      permission: Scuba.enableDiveLight
+      permission-message: You need permission to do that!
+   disableDiveLight:
+      description: Turn off the dive light.
+      permission: Scuba.disableDiveLight
+      permission-message: You need permission to do that!
+permissions:
+    Scuba.*:
+        description: Gives access to all Scuba commands
+        children:
+            Scuba.fillTank: true
+            Scuba.checkTank: true
+            Scuba.makeDiveLight: true
+            Scuba.checkDiveLight: true
+            Scuba.enableDiveLight: true
+            Scuba.disableDiveLight: true
+    Scuba.fillTank:
+        description: Fill a supplied player's tank.
+        default: op
+    Scuba.checkTank:
+        description: Check the fill level of your tank.
+        default: true
+    Scuba.makeDiveLight:
+        description: Create a dive light.
+        default: true
+    Scuba.checkDiveLight:
+        description: Check the time left on your light.
+        default: true
+    Scuba.enableDiveLight:
+        description: Enable the Dive Light.
+        default: true
+    Scuba.disableDiveLight:
+        description: Disable the Dive Light.
+        default: true
