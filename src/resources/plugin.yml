@@ -1,5 +1,5 @@
 name: Scuba
-main: com.allen-software.scuba.Scuba
+main: com.allen_software.scuba.Scuba
 version: 0.1.1
 commands:
    fillTank:
