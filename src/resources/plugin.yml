@@ -1,6 +1,6 @@
 name: Scuba
-main: com.allensoftware.scuba.Scuba
-version: 0.1.0
+main: com.allen_software.scuba.Scuba
+version: 0.1.1
 commands:
    fillTank:
       description: This command fills a given players SCUBA tank.

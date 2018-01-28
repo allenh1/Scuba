@@ -1,4 +1,4 @@
-package com.allensoftware.scuba;
+package com.allen_software.scuba;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
