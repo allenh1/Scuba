@@ -1,4 +1,4 @@
-Package com.allen_software.scuba;
+package com.allen_software.scuba;
 
 public class Tank 
 {
