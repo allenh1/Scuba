@@ -17,42 +17,60 @@
 
 package com.allen_software.scuba;
 
+
 public class DiveLight extends Thread
 {
     private boolean isOn;
+    private boolean turned_on;
     private boolean enabled;
     private int secondsLeft;
-	
+
     public DiveLight()
     {
         isOn = false;
+        turned_on = false;
         enabled = false;
         secondsLeft = 1800; //30 minutes
     }//dive light
-	
+
     public void turnOn()
     { isOn = true; }
-	
+
     public void turnOff()
     { isOn = false; }
-	
+
+    public void switch_on()
+    {
+        turned_on = true;
+        turnOn();
+    }
+
+    public void switch_off()
+    {
+        turned_on = false;
+        turnOff();
+    }
+
     public void enable()
     { enabled = true; secondsLeft = 1800; start(); }
-	
+
     public boolean isEnabled()
     { return enabled; }
-	
+
+    public boolean isTurnedOn()
+    { return turned_on; }
+
     public String getTimeLeft()
     {
         return Integer.toString(secondsLeft / 60) + ":" + Integer.toString(secondsLeft % 60);
     }//get the remaining time
-	
+
     public boolean lightOn()
     { return isOn; }
-	
+
     public boolean deadBattery()
     { return secondsLeft <= 0; }
-	
+
     public void run()
     {
         for (; secondsLeft > 0; ) {
@@ -62,11 +80,10 @@ public class DiveLight extends Thread
                 } catch(InterruptedException ex) {
                     Thread.currentThread().interrupt();
                 } // sleep for one second
-				
                 secondsLeft--;
             } // only drain battery when on.
         }
-		
-        enabled = false; isOn = false; secondsLeft = 0;
+        enabled = false; isOn = false;
+        turned_on = false; secondsLeft = 0;
     }//end void
 }

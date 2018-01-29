@@ -27,7 +27,9 @@ import org.bukkit.Location;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
 
-public class Diver extends Thread{
+
+public class Diver extends Thread
+{
     private Tank tank;
     private OfflinePlayer player_offline;
     private String name;
@@ -58,24 +60,18 @@ public class Diver extends Thread{
 
     private boolean isUnderwater()
     {
-        if (!notRegistered) {
-            World w = player.getWorld();
-            Location l = player.getLocation();
-            l.setY(l.getY() + 1);
-            if(w.getBlockAt(l).getType() == Material.WATER || w.getBlockAt(l).getType() == Material.STATIONARY_WATER) {
-                return true;
-            }
-            else {
-                return false;
-            }
-        }
-
-        return false;
+        World w = player.getWorld();
+        Location l = player.getLocation();
+        l.setY(l.getY() + 1);
+        return !notRegistered &&
+            (w.getBlockAt(l).getType() == Material.WATER ||
+             w.getBlockAt(l).getType() == Material.STATIONARY_WATER);
+        
     }//check if the player is underwater
 
     public void run()
     {
-        for (; true;) {
+        for (; true; ) {
             if (notRegistered && Bukkit.getServer().getPlayer(player_offline.getName()) != null) {
                 player = Bukkit.getServer().getPlayer(player_offline.getName());
                 Bukkit.getServer().getLogger().info("Diver " + player.getName() +" is now online.");
@@ -105,12 +101,17 @@ public class Diver extends Thread{
                 if (!isUnderwater() && !tank.isFull()) {
                     tank.fill(0.0001);
                 }
-                if (diveLight.isEnabled() && isUnderwater() && !diveLight.deadBattery())
+                if (isUnderwater() && !diveLight.deadBattery() && diveLight.isTurnedOn())
                     diveLight.turnOn();
                 if (!tank.isEmpty() && isUnderwater()) {
                     /* 5 percent drain if underwater and tank has air */
                     tank.drain(0.0005); player.setRemainingAir(400);
                 }
+            }
+            try {
+                sleep(100);
+            } catch (java.lang.InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
         }
     }
@@ -128,10 +129,10 @@ public class Diver extends Thread{
     { return diveLight.getTimeLeft(); }
 
     public void enableLight()
-    { diveLight.turnOn(); }
+    { diveLight.switch_on(); }
 
     public void disableLight()
-    { diveLight.turnOff(); }
+    { diveLight.switch_off(); }
 
     public void getDiveLight()
     {
