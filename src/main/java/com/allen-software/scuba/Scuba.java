@@ -17,7 +17,7 @@
 
 package com.allen_software.scuba;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.*;
@@ -28,20 +28,21 @@ import org.bukkit.event.player.*;
 
 public final class Scuba extends JavaPlugin
 {
-    private ArrayList<Diver> divers;
+    private HashMap<String, Diver> divers;
 
     @Override
     public void onEnable()
     {
         getLogger().info("SCUBA plugin enabled!");
-        divers = new ArrayList<Diver>();
+        divers = new HashMap<String, Diver>();
         /** This code updates the players tank **/
         for (OfflinePlayer p : getServer().getOfflinePlayers()) {
-            divers.add(new Diver(p.getName())); //add diver to the list
-            getLogger().info("Added new Diver: " + p.getName());
+            String name = p.getName();
+            Diver d = new Diver(name);
+            d.start();                
+            divers.put(p.getName(), d);
+            getLogger().info("Added new Diver: " + name);
         }
-        for (int x = 0; x < divers.size(); x++)
-            divers.get(x).start();
     }
 
     @Override
@@ -55,157 +56,97 @@ public final class Scuba extends JavaPlugin
     {
         getLogger().info("Call to login method.");
         /** This code updates the players tank **/
-        divers.add(new Diver(event.getPlayer().getName())); //add diver to the list
-        getLogger().info("Added new Diver: " + event.getPlayer().getName());
-        divers.get(divers.size() - 1).start();
+        String new_name = event.getPlayer().getName();
+        Diver nd = new Diver(new_name); nd.start();
+        divers.put(new_name, nd);
+        getLogger().info("Added new Diver: " + new_name);
     }
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event)
     {
-        getLogger().info("Scuba: Beginning clean logoff...");
+        getLogger().info("SCUBA: Beginning clean logoff...");
         /**
          * This code allows a player to sign off without crashing
          * the plugin. Not my wisest coding practice...
          */
         //find the correct diver
-        int index = 0;
-        while (divers.get(index).getPlayerName() != event.getPlayer().getName())
-            index++;
-        divers.get(index).stop();
-        divers.remove(index);
+        String to_find = event.getPlayer().getName();
+        Diver d = divers.remove(to_find);
+        if (d != null)
+            d.stop();
+        else
+            getLogger().info("Someone I don't know just left...");
     }//handles when a player leaves the server (to avoid a thread exception)
 
     public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args)
     {
         if (cmd.getName().equalsIgnoreCase("fillTank")) {
-            if (args.length != 1) {
-                sender.sendMessage("Invalid Arguments. Try /fillTank <player>");
-                return false;
-            }//end if
-
-            int index = 0;
-
-            for (index = 0; index < divers.size(); index++) {
-                if (divers.get(index).getPlayerName().equalsIgnoreCase(args[0]))
-                    break;
-            }//find the diver
-            if (index == divers.size() - 1 && index != 0) {
+            String name = args.length == 0 ? sender.getName() : args[0];
+            Diver d = divers.get(name);
+            if (null == d) {
                 sender.sendMessage("Diver not registered!");
                 return false;
-            }//end if
-
-            divers.get(index).fillTank();
-
+            }
+            d.fillTank();
             return true;
         } else if (cmd.getName().equalsIgnoreCase("checkTank")) {
-            if (args.length == 0) {
-                String playerName = sender.getName();
-                for (int x = 0; x < divers.size(); x++) {
-                    if (playerName.equalsIgnoreCase(divers.get(x).getPlayerName())) {
-                        sender.sendMessage(divers.get(x).getFillLevel());
-                        return true;
-                    }//find the player and send tank information.
-                }//end for x
-
+            String name = args.length == 0 ? sender.getName() : args[0];
+            Diver d = divers.get(name);
+            if (null == d) {
                 sender.sendMessage("Diver not registered!");
                 return false;
-            } else if (args.length == 1) {
-                String playerName = args[0];
-                for (int x = 0; x < divers.size(); x++)
-                    {
-                        if (playerName.equalsIgnoreCase(divers.get(x).getPlayerName()))
-                            {
-                                sender.sendMessage(divers.get(x).getFillLevel());
-                                return true;
-                            }//find the player and send tank information.
-                    }//end for x
-                sender.sendMessage("Diver not registered!");
-                return false;
-            }//check for a specific player
-            else
-                sender.sendMessage("Invalid Synatax! Please use /checkTank <player>");
+            }
+            sender.sendMessage(d.getFillLevel());
             return true;
         } else if (cmd.getName().equalsIgnoreCase("makeDiveLight")) {
-            if (args.length == 0) {
-                String playerName = sender.getName();
-                for (int x = 0; x < divers.size(); x++) {
-                    if (playerName.equalsIgnoreCase(divers.get(x).getPlayerName())) {
-                        divers.get(x).getDiveLight();
-                        return true;
-                    }//find the player and send tank information.
-                }//end for x
+            if (args.length != 0) {
+                sender.sendMessage("Invalid Arguments! Please use /makeDiveLight");
+                return false;
+            }
+            // TODO(allenh1): it would be cool to gift a dive light.
+            Diver d = divers.get(sender.getName());
+            if (null == d) {
                 sender.sendMessage("Diver not registered!");
                 return false;
-            } else if (args.length == 1) {
-                String playerName = args[0];
-                for (int x = 0; x < divers.size(); x++) {
-                    if (playerName.equalsIgnoreCase(divers.get(x).getPlayerName())) {
-                        divers.get(x).getDiveLight();
-                        return true;
-                    }//find the player and send tank information.
-                }//end for x
-                sender.sendMessage("Diver not registered!");
-                return false;
-            }//check for a specific player
-            else
-                sender.sendMessage("Invalid Synatax! Please use /makeDiveLight <player>");
+            }
+            d.getDiveLight();
             return true;
         } else if (cmd.getName().equalsIgnoreCase("enableDiveLight")) {
-            if (args.length != 0)
-                sender.sendMessage("No player arguments required!");
-            else {
-                String playerName = sender.getName();
-                for (int x = 0; x < divers.size(); x++) {
-                    if (playerName.equalsIgnoreCase(divers.get(x).getPlayerName())) {
-                        divers.get(x).enableLight();
-                        return true;
-                    }//find the player and send tank information.
-                }//end for x
-                sender.sendMessage("Diver not registered!");
+            if (args.length != 0) {
+                sender.sendMessage("Invalid Arguments! Please use /enableDiveLight!");
                 return false;
             }
-        } else if (cmd.getName().equalsIgnoreCase("disableDiveLight")) {
-            if (args.length != 0)
-                sender.sendMessage("No player arguments required!");
-            else {
-                String playerName = sender.getName();
-                for (int x = 0; x < divers.size(); x++) {
-                    if (playerName.equalsIgnoreCase(divers.get(x).getPlayerName())) {
-                        divers.get(x).disableLight();
-                        return true;
-                    }//find the player and send tank information.
-                }//end for x
-                sender.sendMessage("Diver not registered!");
+            Diver d = divers.get(sender.getName());
+            if (null == d) {
+                sender.sendMessage("Diver not registered");
                 return false;
             }
-        }
-        else if (cmd.getName().equalsIgnoreCase("checkDiveLight")) {
-            if (args.length == 0) {
-                String playerName = sender.getName();
-                for (int x = 0; x < divers.size(); x++) {
-                    if (playerName.equalsIgnoreCase(divers.get(x).getPlayerName())) {
-                        sender.sendMessage(divers.get(x).getLightRemaining());
-                        return true;
-                    }//find the player and send tank information.
-                }//end for x
-                sender.sendMessage("Diver not registered!");
-                return false;
-            } else if (args.length == 1) {
-                String playerName = args[0];
-                for (int x = 0; x < divers.size(); x++) {
-                    if (playerName.equalsIgnoreCase(divers.get(x).getPlayerName())) {
-                        sender.sendMessage(divers.get(x).getLightRemaining());
-                        return true;
-                    }//find the player and send tank information.
-                }//end for x
-                sender.sendMessage("Diver not registered!");
-                return false;
-            }//check for a specific player
-            else
-                sender.sendMessage("Invalid Synatax! Please use /checkTank <player>");
+            d.enableLight();
             return true;
-        }//Check dive light
-        return false; //no commands made
+        } else if (cmd.getName().equalsIgnoreCase("disableDiveLight")) {
+            if (args.length != 0) {
+                sender.sendMessage("Invalid Arguments! Please use /disablediveLight!");
+                return false;
+            }
+            Diver d = divers.get(sender.getName());
+            if (null == d) {
+                sender.sendMessage("Diver not registered");
+                return false;
+            }
+            d.disableLight();
+            return true;
+        } else if (cmd.getName().equalsIgnoreCase("checkDiveLight")) {
+            String name = args.length == 0 ? sender.getName() : args[0];
+            Diver d = divers.get(name);
+            if (null == d) {
+                sender.sendMessage("Diver not registered!");
+                return false;
+            }
+            sender.sendMessage(d.getLightRemaining());
+            return true;
+        }
+        sender.sendMessage("Invalid Synatax! Please use /checkDiveLight [player]");
+        return false;
     }
 }
